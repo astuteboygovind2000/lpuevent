@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DoctorFinder | Modern Doctor Search</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    :root {
+      --primary: #0da293;
+      --accent: #1976d2;
+      --bg: #f8fffc;
+      --dark: #163344;
+      --light: #fff;
+      --grad: linear-gradient(124deg, #0defff 0%, #0da293 84%);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; font-family: 'Montserrat', sans-serif;
+      background: var(--bg);
+      color: var(--dark);
+      overflow-x: hidden;
+    }
+    /* NAVIGATION */
+    nav {
+      position: fixed;
+      top: 0; left: 0; width: 100%;
+      height: 70px;
+      background: rgba(19, 49, 78, 0.90);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 5vw;
+      z-index: 10; backdrop-filter: blur(8px);
+    }
+    .nav-logo {
+      font-size: 2rem; font-weight: 900; color: var(--primary); letter-spacing: 2px;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .nav-menu {
+      display: flex; gap: 2.5vw;
+      font-weight: 600;
+      font-size: 1.07rem;
+    }
+    .nav-menu a {
+      color: var(--light); text-decoration: none;
+      position: relative;
+      transition: color .25s;
+    }
+    .nav-menu a::after {
+      content: ''; display:block; height:2px;
+      width:0; background: var(--primary);
+      transition:.3s;
+      margin-top:6px;
+    }
+    .nav-menu a.active, .nav-menu a:hover {
+      color: var(--primary);
+    }
+    .nav-menu a.active::after, .nav-menu a:hover::after {
+      width: 100%;
+    }
+    /* Hamburger on mobile */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
+    }
+    .bar {
+      width: 27px; height: 3px; background: #fafafa;
+      margin: 4px 0; border-radius: 2px; transition: .4s;
+    }
+    @media (max-width:900px) {
+      .nav-menu { display: none; position: fixed; top: 70px; right: 0;
+        background: #13414e;
+        flex-direction: column; gap: 2rem; width: 70vw; padding: 2rem 3vw;
+        border-radius: 18px 0 0 18px; align-items: flex-end;}
+      .nav-menu.active { display: flex;}
+      .hamburger { display: flex;}
+    }
+
+    /* HERO */
+    .hero-bg {
+      position: absolute; left:0; top:0; width:100%; height:100%;
+      background: var(--grad), url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+      z-index: 0; opacity: .20;
+      animation: heroBGfade 2s cubic-bezier(.35,1.45,.7,1) 0.2s both;
+    }
+    @keyframes heroBGfade { from { opacity: 0;} to {opacity:.19;} }
+    .hero {
+      min-height: 98vh; display: flex; align-items: center; justify-content: space-between;
+      padding: 110px 7vw 70px 7vw; position: relative;
+      overflow: hidden;
+      background: var(--bg);
+    }
+    .hero-content {
+      z-index:1; max-width: 560px;
+      animation: fadein 1.2s cubic-bezier(.6,1,.8,1) .3s both;
+    }
+    .hero-title {
+      font-size: 3rem; font-weight: 800;
+      background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 1.1rem;
+      line-height:1.08;
+    }
+    .hero-desc {
+      color: #234; font-size: 1.2rem; margin-bottom: 2.2rem;
+      font-weight: 500;
+    }
+    .hero-btns {
+      display: flex; gap: 1.5rem; margin-top:1.4rem;
+    }
+    .hero-btn, .hero-btn.secondary {
+      background: var(--primary); color: var(--light); border:none;
+      padding: 1em 2.7em; border-radius: 32px;
+      font-size: 1.07em; font-weight: 700; cursor: pointer;
+      box-shadow: 0 7px 28px #0da29335;
+      transition: background .25s, box-shadow .21s, color .19s;
+      text-decoration:none; display:inline-block;
+    }
+    .hero-btn.secondary {
+      background: var(--accent); color: #fff; font-weight: 500;
+      box-shadow: 0 3px 24px #1976d255;
+    }
+    .hero-btn:hover { background: #fff; color: var(--primary);}
+    .hero-img {
+      max-width: 440px; width: 100%; z-index:1;
+      animation: fadein 1s cubic-bezier(.7,1.18,.9,.9) .35s both;
+    }
+    .hero-img img {
+      width:100%; border-radius:1.5em; box-shadow: 0 7px 42px #0da29322;
+      filter:brightness(1.04) saturate(1.15);
+    }
+    @keyframes fadein { from {opacity:0;transform:translateY(60px);} to {opacity:1;transform:translateY(0);} }
+    @media (max-width:1000px) {
+      .hero { flex-direction: column-reverse; text-align: center; padding:100px 2vw 80px 2vw; }
+      .hero-content { max-width:100%; }
+      .hero-img { max-width:340px; margin-bottom:2rem; }
+    }
+    /* Quickfinder bar */
+    .quickfinder {
+      background: var(--light); border-radius:2em;
+      box-shadow: 0 3px 20px #1dc9a010;
+      margin: -60px auto 30px auto; max-width:900px; padding: 2em 3vw;
+      position: relative;
+      z-index:2; display:flex; justify-content:space-around; align-items:center; gap:2vw;
+      animation: fadein .9s cubic-bezier(.5,1.2,.6,1) .5s both;
+    }
+    .quickfinder input, .quickfinder select, .quickfinder button {
+      padding: .85em 1.3em; border-radius: 1.5em; border:1px solid #daeaea;
+      font-size:1em; outline:none;
+      margin:0 .5em;
+      transition: border .18s;
+    }
+    .quickfinder input:focus, .quickfinder select:focus { border:1.5px solid var(--accent);}
+    .quickfinder button {
+      background: var(--primary); color:var(--light);
+      border:none; cursor:pointer;
+      font-weight:700;
+      transition: background .22s, color .15s;
+    }
+    .quickfinder button:hover { background:#14e7f8; color:#13414e;}
+    @media (max-width:900px) {
+      .quickfinder { flex-wrap: wrap; gap:1.5em; padding:1.6em 4vw; }
+      .quickfinder input, .quickfinder select, .quickfinder button {margin:.15em 0;}
+    }
+
+    /* COUNTERS */
+    .stats {
+      display: flex; justify-content: space-around; align-items: center;
+      margin: 5em 0 4em 0; padding: 2.2em 0;
+      background: var(--grad); color:#fff;
+      border-radius: 2em; box-shadow: 0 2px 14px #0da29313;
+      font-weight:600; gap:1vw;
+      animation:fadein 1.2s cubic-bezier(.65,1.14,.58,1.24) .6s both;
+    }
+    .stat-item {
+      text-align:center; font-size: 1.2em;
+      margin:0 2vw; }
+    .stat-count {
+      font-size:2.8em;
+      font-weight:900;
+      letter-spacing:-.8px;
+      display:block;
+      background:rgba(255,255,255,.10);
+      border-radius:1em;
+      padding:.10em .5em;
+      margin-bottom:.1em;
+    }
+    @media (max-width:700px) {
+      .stats { flex-direction:column; gap:3em; }
+      .stat-item { margin:0;}
+    }
+    /* DOCTORS */
+    .doctors {
+      max-width:1100px; margin:0 auto 4em auto; padding:2em 3vw;
+    }
+    .doctors-title { font-size:2rem; font-weight:800; margin-bottom:1.6em; color:var(--accent);}
+    .doctor-cards { display:flex; flex-wrap:wrap; gap:2em; justify-content:center;}
+    .doctor-card {
+      background:var(--light); border-radius:1.2em; box-shadow:0 3px 18px #0da2930d;
+      flex:1; min-width: 265px; max-width:320px; padding:2em 1.2em 1.5em 1.2em;
+      display:flex; flex-direction:column; align-items:center;
+      position:relative; overflow:hidden;
+      transition: box-shadow .2s, transform .2s;
+    }
+    .doctor-card:hover { box-shadow: 0 14px 44px #0da29333; transform: scale(1.035);}
+    .doctor-img img {
+      border-radius:1em; width:120px; height:120px; object-fit:cover; box-shadow:0 2px 10px #0da29323;
+      margin-bottom:.9em;
+    }
+    .doctor-name { font-weight:700; font-size:1.15em; margin-bottom: .2em;}
+    .doctor-spec { color:var(--primary); font-size:.98em; margin-bottom:.7em;}
+    .doctor-desc { font-size:.97em; color: #555c; margin-bottom:1.5em;}
+    .doctor-links a { margin-right:1.2em; color: var(--accent); font-size:1.15em; text-decoration:none;}
+    /* Testimonial Carousel */
+    .testimonials {
+      background: var(--grad); color: #fff; padding: 6em 2vw;
+      border-radius: 2em; margin-bottom:5em;
+      position:relative; overflow:hidden;
+      box-shadow: 0 2px 18px #0da29320;
+    }
+    .testimonial-title { font-size:2rem; font-weight:800; text-align:center; margin-bottom:2em;}
+    .testimonial-slide {
+      display:none; text-align:center; animation:fadein .7s forwards;
+    }
+    .testimonial-slide.active { display:block; }
+    .testimonial-quote { font-size:1.25em; font-style:italic; margin-bottom:2em;}
+    .testimonial-user {
+      font-weight:700; color:var(--dark); background:rgba(255,255,255,.12);
+      display:inline-block; border-radius:2em; padding: .4em 2em;
+    }
+    .testimonial-controls {
+      text-align:center; margin-top:2.5em;
+    }
+    .testimonial-dot {
+      width:15px; height:15px; border-radius:50%; background: #fff5;
+      display:inline-block; margin:0 .5em; cursor:pointer;
+      border:2.5px solid #fff;
+    }
+    .testimonial-dot.active { background: #fff; border-color: var(--primary);}
+    /* Blog/News */
+    .blog-section {
+      max-width:1100px; margin:0 auto 4em auto; padding:2.5em 3vw;
+    }
+    .blog-title { font-size:2rem; font-weight:800; margin-bottom:.9em; color:var(--accent);}
+    .blog-cards {
+      display:flex; flex-wrap:wrap; gap:2em; justify-content:center;
+    }
+    .blog-card {
+      background:var(--light);border-radius:1em; box-shadow:0 3px 14px #0da2930e;
+      flex:1; min-width:240px; max-width:375px; padding:1.3em 1.2em;
+      display:flex; flex-direction:column;
+      transition: box-shadow .2s, transform .18s;
+      cursor:pointer;
+    }
+    .blog-card:hover { box-shadow:0 13px 32px #0da2932c; transform:translateY(-8px);}
+    .blog-img img {width:100%; border-radius:.7em; margin-bottom:.9em;}
+    .blog-title-card { font-weight:700; color: var(--primary); margin-bottom:.5em;}
+    .blog-date { color: #1976d2cc; font-size:.95em; margin-bottom:.6em;}
+    .blog-excerpt { font-size: .99em; color: #555b; }
+    /* About Section */
+    #about { max-width:1100px; margin:0 auto 4em auto; padding:3rem 4vw; }
+    .about-title { font-size:2.1rem; font-weight:800; color:var(--primary); margin-bottom:1.4em;}
+    .about-body { font-size:1.13em; line-height:1.5; color:#233;}
+    /* Contact Section */
+    #contact { max-width:1100px; margin:0 auto 4em auto; padding:4rem 4vw; background: var(--grad); color:#fff; border-radius:2em;}
+    .contact-title { font-size:2.2rem; font-weight:800; margin-bottom:.9em;}
+    .contact-body { font-size:1.1em; margin-bottom: 2.2em;}
+    .contact-info2 { display:flex; gap:2em; flex-wrap: wrap;}
+    .contact-card2 {
+      background:#fff2; border-radius:1.3em; padding:1.1em 2em;
+      color:#fff; display:flex;align-items:center;gap:.7em; min-width:175px; font-size:1.07em;
+      font-weight:600;box-shadow:0 3px 18px #0da29316;}
+    .contact-card2 i { color: #fff; font-size:1.3em;}
+    /* Sticky Booking Bar */
+    .sticky-bar {
+      position: fixed; bottom:0; left:0; width:100%; z-index:90;
+      background: var(--primary); color:#fff;
+      display:flex; justify-content:space-between; align-items:center;
+      padding: 1em 4vw; font-weight:700;
+      font-size:1.09em; box-shadow: 0 -2px 15px #1976d255;
+      animation: slideup .8s cubic-bezier(.4,1.45,.6,1) 0.8s both;
+    }
+    .sticky-bar-btn {
+      background: #fff; color:var(--primary); border:none; padding:.6em 1.5em;
+      border-radius:1.5em; font-weight:700; font-size:1em; cursor:pointer; margin-left: 2em;
+      transition:background .2s,color .2s;
+    }
+    .sticky-bar-btn:hover { background:var(--accent); color:#fff;}
+    @keyframes slideup { from {opacity:0; transform:translateY(80px);} to {opacity:1;transform:translateY(0);} }
+    /* Footer */
+    footer { text-align:center; padding:1.6em; color:#444; font-size:1em; }
+
+    /* Responsive fixes */
+    @media (max-width:700px) {
+      #about, #contact, .blog-section, .doctors { padding:1.5em 3vw;}
+      .testimonials { padding:2.7em 1vw;}
+      .about-title, .blog-title, .doctors-title, .testimonial-title, .contact-title { font-size:1.38rem;}
+      .doctor-cards, .blog-cards, .contact-info2 { gap:1.1em;}
+      .sticky-bar { flex-direction:column; font-size:.98em; gap:.8em;}
+      .sticky-bar-btn {margin-left:0; width:100%;margin-top:.6em;}
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <span class="nav-logo"><i class="fa-solid fa-user-doctor"></i> DoctorFinder</span>
+    <div class="nav-menu" id="navMenu">
+      <a href="#home" class="active">Home</a>
+      <a href="#doctors">Doctors</a>
+      <a href="#about">About</a>
+      <a href="#blog">Blog</a>
+      <a href="#contact">Contact &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
+    </div>
+    <div class="hamburger" id="hamburgerMenu">
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+    </div>
+  </nav>
+
+  <!-- HERO BANNER -->
+  <section class="hero" id="home">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-title">Find Trusted Doctors Instantly</div>
+      <div class="hero-desc">Compare, book, and connect with top-rated specialists and clinics near you—fast, easy, and fully verified.</div>
+      <div class="hero-btns">
+        <a href="#doctors" class="hero-btn">Find Doctors</a>
+        <a href="#about" class="hero-btn secondary">How it Works</a>
+      </div>
+    </div>
+    <div class="hero-img">
+      <img src="https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?auto=format&fit=crop&w=700&q=80" alt="Doctor illustration"/>
+    </div>
+  </section>
+
+  <!-- QUICKFINDER BAR -->
+  <div class="quickfinder">
+    <input type="text" placeholder="Search by Doctor, Clinic or Specialty">
+    <select>
+      <option value="">Location</option>
+      <option>Mumbai</option>
+      <option>Delhi</option>
+      <option>Chennai</option>
+      <option>Bangalore</option>
+      <option>Pune</option>
+    </select>
+    <button>Search</button>
+  </div>
+
+  <!-- COUNTERS -->
+  <div class="stats">
+    <div class="stat-item"><span class="stat-count" id="stat1">0</span>Doctors Listed</div>
+    <div class="stat-item"><span class="stat-count" id="stat2">0</span>Verified Clinics</div>
+    <div class="stat-item"><span class="stat-count" id="stat3">0</span>Satisfied Patients</div>
+  </div>
+
+  <!-- DOCTORS SHOWCASE -->
+  <div class="doctors" id="doctors">
+    <div class="doctors-title">Featured Doctors</div>
+    <div class="doctor-cards">
+      <div class="doctor-card">
+        <div class="doctor-img"><img src="https://images.unsplash.com/photo-1527613426441-4da17471b66d?auto=format&fit=crop&w=400&q=80" /></div>
+        <div class="doctor-name">Dr. Neha Iyer</div>
+        <div class="doctor-spec">Cardiologist, Mumbai</div>
+        <div class="doctor-desc">15+ years of experience, specializes in complex heart conditions. Member of the National Cardio Society.</div>
+        <div class="doctor-links">
+          <a href="#"><i class="fa-solid fa-user-md"></i> View</a>
+          <a href="#"><i class="fa-solid fa-calendar"></i> Book</a>
+        </div>
+      </div>
+      <div class="doctor-card">
+        <div class="doctor-img"><img src="https://images.unsplash.com/photo-1520880867055-1e30d1cb001c?auto=format&fit=crop&w=400&q=80" /></div>
+        <div class="doctor-name">Dr. Ravi Kumar</div>
+        <div class="doctor-spec">Orthopedic Surgeon, Delhi</div>
+        <div class="doctor-desc">Orthopedics, sports injuries, joint replacement specialist. Empathetic and highly rated by patients.</div>
+        <div class="doctor-links">
+          <a href="#"><i class="fa-solid fa-user-md"></i> View</a>
+          <a href="#"><i class="fa-solid fa-calendar"></i> Book</a>
+        </div>
+      </div>
+      <div class="doctor-card">
+        <div class="doctor-img"><img src="https://images.unsplash.com/photo-1511174511562-5f97f2dd20b5?auto=format&fit=crop&w=400&q=80" /></div>
+        <div class="doctor-name">Dr. Sunita Chawla</div>
+        <div class="doctor-spec">Pediatrician, Bangalore</div>
+        <div class="doctor-desc">Child healthcare, growth development, and immunization expert. Loved by families for her care.</div>
+        <div class="doctor-links">
+          <a href="#"><i class="fa-solid fa-user-md"></i> View</a>
+          <a href="#"><i class="fa-solid fa-calendar"></i> Book</a>
+        </div>
+      </div>
+      <div class="doctor-card">
+        <div class="doctor-img"><img src="https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=400&q=80" /></div>
+        <div class="doctor-name">Dr. Faisal Shaikh</div>
+        <div class="doctor-spec">Dermatologist, Pune</div>
+        <div class="doctor-desc">Expert in advanced skin and hair treatments. Author of 20+ medical articles and conference speaker.</div>
+        <div class="doctor-links">
+          <a href="#"><i class="fa-solid fa-user-md"></i> View</a>
+          <a href="#"><i class="fa-solid fa-calendar"></i> Book</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TESTIMONIALS CAROUSEL -->
+  <div class="testimonials">
+    <div class="testimonial-title">Patient Stories</div>
+    <div class="testimonial-slide active">
+      <div class="testimonial-quote">"The booking process was seamless and I found the right doctor so quickly. I felt genuinely supported the whole way!"</div>
+      <div class="testimonial-user">— Priya Rajan, Bangalore</div>
+    </div>
+    <div class="testimonial-slide">
+      <div class="testimonial-quote">"DoctorFinder’s verified reviews made it easy to trust the listed doctors. Highly recommended for anyone new in the city."</div>
+      <div class="testimonial-user">— Amit Sharma, Mumbai</div>
+    </div>
+    <div class="testimonial-slide">
+      <div class="testimonial-quote">"Amazing experience! Loved the design and how fast it was to connect to a specialist nearby. Five stars."</div>
+      <div class="testimonial-user">— Sarah George, Chennai</div>
+    </div>
+    <div class="testimonial-controls">
+      <span class="testimonial-dot active"></span>
+      <span class="testimonial-dot"></span>
+      <span class="testimonial-dot"></span>
+    </div>
+  </div>
+
+  <!-- BLOG / NEWS -->
+  <div class="blog-section" id="blog">
+    <div class="blog-title">Latest Health Tips & News</div>
+    <div class="blog-cards">
+      <div class="blog-card">
+        <div class="blog-img"><img src="https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=400&q=80" /></div>
+        <div class="blog-title-card">How to Choose the Right Doctor</div>
+        <div class="blog-date">Sep 21, 2025</div>
+        <div class="blog-excerpt">Five actionable tips for finding a specialist you can trust, whether for routine care or a medical emergency.</div>
+      </div>
+      <div class="blog-card">
+        <div class="blog-img"><img src="https://images.unsplash.com/photo-1485841890310-6a055c88698a?auto=format&fit=crop&w=400&q=80" /></div>
+        <div class="blog-title-card">Latest Vaccination Guidelines 2025</div>
+        <div class="blog-date">Sep 14, 2025</div>
+        <div class="blog-excerpt">Stay up-to-date with government and WHO recommendations on routine, seasonal, and travel vaccines.</div>
+      </div>
+      <div class="blog-card">
+        <div class="blog-img"><img src="https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=400&q=80" /></div>
+        <div class="blog-title-card">Coping With Stress: A Doctor’s Advice</div>
+        <div class="blog-date">Sep 8, 2025</div>
+        <div class="blog-excerpt">Top doctor-recommended stress management tools, plus proven ways to improve emotional wellness in fast-paced cities.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABOUT SECTION -->
+  <div id="about">
+    <div class="about-title">About DoctorFinder</div>
+    <div class="about-body">
+      DoctorFinder was built to make healthcare discovery in India easy, smart, and secure. Our mission is to help patients connect directly to top doctors and hospitals—with no stress and total transparency.<br><br>
+      What we offer:
+      <ul>
+        <li>Instant search across thousands of verified doctors, clinics, and hospitals.</li>
+        <li>100% genuine reviews and ratings by real patients only.</li>
+        <li>Data privacy, secure bookings, and expert healthcare content.</li>
+        <li>Quick appointments, easy filters, integrated payments, and live support.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- CONTACT SECTION -->
+  <div id="contact">
+    <div class="contact-title">Contact Us</div>
+    <div class="contact-body">Any questions, partnership ideas or technical support required? Reach out to our team and we’ll respond usually within 24 hours.</div>
+    <div class="contact-info2">
+      <div class="contact-card2"><i class="fa-solid fa-envelope"></i> support@doctorfinder.com</div>
+      <div class="contact-card2"><i class="fa-solid fa-phone"></i> +91 90000 11111</div>
+      <div class="contact-card2"><i class="fa-brands fa-whatsapp"></i> +91 90000 11112</div>
+      <div class="contact-card2"><i class="fa-solid fa-location-dot"></i> Mumbai, India</div>
+    </div>
+  </div>
+
+  <!-- STICKY BAR -->
+  <div class="sticky-bar">
+    <spa>Need a doctor now?</spa>
+    <button class="sticky-bar-btn">Book Appointment</button>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    © 2025 DoctorFinder. Designed for students and professionals. Images: Unsplash.
+  </footer>
+
+  <!-- SCRIPTS for hamburger/navigation, counter animation, testimonials carousel -->
+  <script>
+    // Navigation hamburger
+    const hamburger = document.getElementById('hamburgerMenu');
+    const navMenu = document.getElementById('navMenu');
+    hamburger.onclick = ()=> { navMenu.classList.toggle('active'); };
+
+    // Nav scroll spy
+    window.addEventListener('scroll', () => {
+      const sections = ['home', 'doctors', 'about', 'blog', 'contact'];
+      let cur = 'home', y = window.scrollY + 100;
+      sections.forEach(id => {
+        const sec = document.getElementById(id);
+        if (sec && sec.offsetTop < y) cur = id;
+      });
+      document.querySelectorAll('.nav-menu a').forEach(a => {
+        a.classList.toggle('active', a.getAttribute('href') === `#${cur}`);
+      });
+    });
+    // Counters animation
+    function animateValue(id, start, end, duration) {
+      let obj = document.getElementById(id);
+      let range = end - start, current = start, increment = end > start ? 1 : -1;
+      let stepTime = Math.abs(Math.floor(duration / range)), timer = setInterval(()=>{
+        current += increment; obj.textContent = current;
+        if (current == end) clearInterval(timer);
+      }, stepTime); obj.textContent=start;
+    }
+    window.onload = function() {
+      animateValue("stat1", 0, 3200, 1100);
+      animateValue("stat2", 0, 570, 1700);
+      animateValue("stat3", 0, 11500, 2200);
+    };
+
+    // Testimonials carousel
+    let tIndex = 0;
+    const slides = document.querySelectorAll('.testimonial-slide');
+    const dots = document.querySelectorAll('.testimonial-dot');
+    function showSlide(idx) {
+      slides.forEach((s,i)=>s.classList.toggle('active',i===idx));
+      dots.forEach((d,i)=>d.classList.toggle('active',i===idx));
+      tIndex=idx;
+    }
+    dots.forEach((dot,i)=>dot.onclick=()=>showSlide(i));
+    setInterval(()=>showSlide((tIndex+1)%slides.length), 7000);
+  </script>
+</body>
+</html>
